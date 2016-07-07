@@ -33,8 +33,7 @@ exports.blueHcitool = function(option,callback) {
             // Start skcan
             var hciToolScan =  spawn('hcitool',['lecc',macAddr])
             console.log("app.js:"+macAddr)
-            //spawn('hcitool', ['lecc', option['mac']]);
-            // spawn('hcitool lecc  '+option['mac']);
+            //spawn('hcitool', ['lecc', option['mac']]); 
 
             // console.log("hcitool scan: started...");
 
