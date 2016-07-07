@@ -13,15 +13,17 @@
 var spawn = require('child_process').spawn;
 var dbtool=require('./dbtools');
 
-var macAddr="00:4D:32:06:24:D1";
+
 
 exports.blueHcitool = function(option,callback) {
+    var macAddr=option['mac'];
 
     //begin Scan
     var begintime = new Date();
     var endtime = new Date();
     // Start skcan
     var hciToolScan =  spawn('hcitool',['lecc',macAddr])
+    console.log("app.js:"+macAddr)
     //spawn('hcitool', ['lecc', option['mac']]);
     // spawn('hcitool lecc  '+option['mac']);
 
@@ -46,7 +48,9 @@ exports.blueHcitool = function(option,callback) {
                 var args={
                     "mac":option['mac'],
                     "ConnectionTime":ConnectionTime,
-                    "DisconnectTime":DisconnectionTime
+                    "DisconnectTime":DisconnectionTime,
+                    "flag":1,
+                    "mi":5
                 };
                 dbtool.insertdb(args);
                 dbtool.updatahandledb(handleValue);
@@ -62,6 +66,16 @@ exports.blueHcitool = function(option,callback) {
 
                 console.log("handlevalue:"+handleValue);
                 var hciToolScans =spawn('hcitool', ['ledc', handleValue])
+                dbtool.selectCountdb({"mac":macAddr},function (count) {
+                    connectrRecord =
+                    {
+                        "mac":macAddr,
+                        "set":{
+                            "normalDisconSum": count[0]["normalDisconSum"] + 1
+                        }
+                    }
+                    dbtool.updataCountdb(connectrRecord);
+                });
                 hciToolScans.stdout.on('data', function (data) {
                     data = data.toString('ascii');
                     console.log("ledc:" + data);
@@ -86,7 +100,8 @@ exports.blueHcitool = function(option,callback) {
                     {
                         "mac":macAddr,
                         "set":{
-                            "disconFai": count[0]["disconFai"] + 1
+                            "disconFai": count[0]["disconFai"] + 1,
+                            "unormalDisconSum": count[0]["unormalDisconSum"] + 1
                         }
                     }
                     dbtool.updataCountdb(connectrRecord);
@@ -100,7 +115,7 @@ exports.blueHcitool = function(option,callback) {
         }
         else if(code===0)
         {
-            dbtool.selectCountdb({"mac":macAddr},function (count) { 
+            dbtool.selectCountdb({"mac":macAddr},function (count) {
                 connectrRecord =
                 {
                     "mac":macAddr,
