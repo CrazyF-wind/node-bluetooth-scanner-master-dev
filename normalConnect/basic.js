@@ -2,7 +2,7 @@
 // var Scanner, bleScanner, callback;
 
 var Scanner = require("./app.js");
-var dbtools=require('./dbtools');
+var dbtools=require('../tests/dbtools');
 
 var options = process.argv;
 
