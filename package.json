@@ -17,6 +17,9 @@
   "author": {
     "name": "Pedro Paixao"
   },
+  "dependencies": {
+    "mongodb": "2.1.20"
+  },
   "license": "MIT",
   "readmeFilename": "README.md"
 }
