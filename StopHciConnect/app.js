@@ -16,10 +16,10 @@ var dbtool=require('../tests/dbtools');
 
 
 exports.blueHcitool = function(option,callback) {
-
+    var hcidev='hci0';
     var macAddr=option['mac'];
 // Bring selected device UP
-    var hciconfig = spawn(tool_path + 'hciconfig', [hcidev, 'up']);
+    var hciconfig = spawn('hciconfig', [hcidev, 'up']);
 
     hciconfig.on("exit", function(code) {
         if(code!==0){
@@ -33,7 +33,7 @@ exports.blueHcitool = function(option,callback) {
             // Start skcan
             var hciToolScan =  spawn('hcitool',['lecc',macAddr])
             console.log("app.js:"+macAddr)
-            //spawn('hcitool', ['lecc', option['mac']]); 
+            //spawn('hcitool', ['lecc', option['mac']]);
 
             // console.log("hcitool scan: started...");
 
@@ -136,7 +136,7 @@ exports.blueHcitool = function(option,callback) {
                     })
                 }
                 // self.emit('done', "hcitool scan: exited (code " + code + ")");
-                var hciconfig = spawn(tool_path + 'hciconfig', [hcidev, 'down']);
+                var hciconfig = spawn('hciconfig', [hcidev, 'down']);
                 hciconfig.on("exit", function(code) {
                     if(code!==0){
                         console.log("Device "+hcidev+"down fail!");
