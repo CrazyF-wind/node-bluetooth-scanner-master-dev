@@ -58,7 +58,7 @@ exports.blueHcitool = function(option,callback) {
                             "mac":option['mac'],
                             "ConnectionTime":ConnectionTime,
                             "DisconnectTime":DisconnectionTime,
-                            "flag":1,
+                            "flag":9999,
                             "mi":5
                         };
                         dbtool.insertdb(args);

@@ -24,6 +24,16 @@ exports.blueHcitool = function(option,callback) {
     hciconfig.on("exit", function(code) {
         if(code!==0){
             console.log("Device "+hcidev+"up fail!");
+            dbtool.selectCountdb({"mac":macAddr},function (count) {
+                connectrRecord =
+                {
+                    "mac":macAddr,
+                    "set":{
+                        "hciDeviceFailNum": count[0]["hciDeviceFailNum"] + 1
+                    }
+                }
+                dbtool.updataCountdb(connectrRecord);
+            });
         }
         else {
             console.log("Device "+hcidev+"up suceed!");
@@ -57,8 +67,10 @@ exports.blueHcitool = function(option,callback) {
                             "mac":option['mac'],
                             "ConnectionTime":ConnectionTime,
                             "DisconnectTime":DisconnectionTime,
-                            "flag":1,
-                            "mi":5
+                            "flag":option['flag'],
+                            "name":option['name'],
+                            "mi":3,
+                            "time":new Date().getTime()
                         };
                         dbtool.insertdb(args);
                         dbtool.updatahandledb(handleValue);

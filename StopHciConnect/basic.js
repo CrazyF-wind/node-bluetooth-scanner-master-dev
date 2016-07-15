@@ -2,15 +2,15 @@
 // var Scanner, bleScanner, callback;
 
 var Scanner = require("../StopHciConnect/app.js");
-var dbtools=require('../tests/dbtools');
+var dbtools = require('../tests/dbtools');
 
 var options = process.argv;
 
 
-var waiter=5000;
+var waiter = 5000;
 var wait = function (mils) {
-  var now = new Date;
-  while (new Date - now <= mils);
+    var now = new Date;
+    while (new Date - now <= mils);
 };
 
 // dbtools.selectdb(function(data) {
@@ -70,23 +70,23 @@ var wait = function (mils) {
 // })
 
 
-
 //scan foreach
-dbtools.selectdb(function(data){
-  // for(var i=0;i<1;i++)
-  // {
-    var option=
+dbtools.selectdb(function (data) {
+    // for(var i=0;i<1;i++)
+    // {
+    var option =
     {
-      "name":data[0]['name'],
-      "mac":options[2],
-      "RSSI":data[0]['RSSI']
+        "name": options[4],
+        "mac": options[2],
+        "RSSI": data[0]['RSSI'],
+        "flag": options[3]
 
     };
 
     // Scanner("hci0",option);
 
 
-    var macAddr="00:4D:32:06:24:D1";
+    var macAddr = "00:4D:32:06:24:D1";
 
     // var connectrRecord=
     // {
@@ -107,11 +107,10 @@ dbtools.selectdb(function(data){
     //         dbtools.insertCountdb(connectrRecord);
     //     }
     // });
-  
-    Scanner.blueHcitool(option,function(datas){
-      // console.log("data:"+datas);
-    });
 
+    Scanner.blueHcitool(option, function (datas) {
+        // console.log("data:"+datas);
+    });
 
 
     // wait(1000);
@@ -120,24 +119,22 @@ dbtools.selectdb(function(data){
 //   }
 
 
-  // var files = [];
-  // for (var i = 0; i < data.length; ++i) {
-  //   var option=
-  //   {
-  //     "name":data[i]['name'],
-  //     "mac":data[i]['mac'],
-  //     "RSSI":data[i]['RSSI']
-  //   };
-  //   files.push(Scanner.blueHcitool(option,function(datas){
-  //     console.log("datas"+datas);
-  //   }));
-  // }
-  //
-  // Promise.all(files).then(function(result) {
-  //   console.log("result"+result);
-  // })
-
-
+    // var files = [];
+    // for (var i = 0; i < data.length; ++i) {
+    //   var option=
+    //   {
+    //     "name":data[i]['name'],
+    //     "mac":data[i]['mac'],
+    //     "RSSI":data[i]['RSSI']
+    //   };
+    //   files.push(Scanner.blueHcitool(option,function(datas){
+    //     console.log("datas"+datas);
+    //   }));
+    // }
+    //
+    // Promise.all(files).then(function(result) {
+    //   console.log("result"+result);
+    // })
 
 
 });
