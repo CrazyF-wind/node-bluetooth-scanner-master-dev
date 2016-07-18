@@ -52,7 +52,7 @@ exports.blueHcitool = function(option,callback) {
                 if (data.length) {
                     var endtime = new Date();
                     console.log("连接成功!");
-                    console.log("设备名称:" +option['name']+"|mac:"+option['mac']+"|RSSI:"+option['RSSI']);
+                    console.log("设备名称:" +option['name']+"|mac:"+option['mac']);
                     var ConnectionTime=(endtime.getTime() - begintime.getTime());
                     console.log('\t' + "连接时间:" + (endtime.getTime() - begintime.getTime()) + "ms");
                     data = data.toString('utf-8');
@@ -69,7 +69,7 @@ exports.blueHcitool = function(option,callback) {
                             "DisconnectTime":DisconnectionTime,
                             "flag":option['flag'],
                             "name":option['name'],
-                            "mi":3,
+                            "mi":5,
                             "time":new Date().getTime()
                         };
                         dbtool.insertdb(args);

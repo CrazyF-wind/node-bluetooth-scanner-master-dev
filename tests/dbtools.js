@@ -1,5 +1,5 @@
 var MongoClient = require('mongodb').MongoClient;
-var DB_CONN_STR = 'mongodb://192.168.31.133:27017/wilsondb1';
+var DB_CONN_STR = 'mongodb://192.168.31.108:27017/wilsondb1';
 
 /**
  * 查询扫描记录

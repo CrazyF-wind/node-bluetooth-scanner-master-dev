@@ -77,8 +77,7 @@ dbtools.selectdb(function (data) {
     var option =
     {
         "name": options[4],
-        "mac": options[2],
-        "RSSI": data[0]['RSSI'],
+        "mac": options[2], 
         "flag": options[3]
 
     };
