@@ -69,7 +69,7 @@ exports.blueHcitool = function(option,callback) {
                             "DisconnectTime":DisconnectionTime,
                             "flag":option['flag'],
                             "name":option['name'],
-                            "mi":5,
+                            "mi":1.5,
                             "time":new Date().getTime()
                         };
                         dbtool.insertdb(args);
