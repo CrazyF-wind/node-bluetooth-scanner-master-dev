@@ -69,8 +69,9 @@ exports.blueHcitool = function(option,callback) {
                             "DisconnectTime":DisconnectionTime,
                             "flag":option['flag'],
                             "name":option['name'],
-                            "mi":1.5,
+                            "mi":5,
                             "time":new Date().getTime()
+                            // "mobile":"Nexus 5"
                         };
                         dbtool.insertdb(args);
                         dbtool.updatahandledb(handleValue);
