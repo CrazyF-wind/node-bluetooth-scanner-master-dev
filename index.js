@@ -1,99 +1,63 @@
 /**
  * Bluetooth scanner using Bluez tools
- * Only Bluez supported platforms are supported by this module
- *
- * Based on BLE-Scanner from Martin Gradler
- * 
- * Author: Pedro Paixao
- * License: MIT
  */
 var spawn = require('child_process').spawn;
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 
-var BluetoothScanner = module.exports = function(hcidev) {
-  var self = this;
-  
-  // Inherit EventEmitter
-  EventEmitter.call(self);
-  
+var BluetoothScanner = module.exports = function (option) {
+    var self = this;
 
-  self.init = function(hcidev) {
-    var tool_path = "";
-    if (hcidev === 'fake') {
-      tool_path = './';
-    }
-    
-    // Bring selected device UP
-    var hciconfig = spawn(tool_path + 'hciconfig', [hcidev, 'up']);
-    
-    hciconfig.on("exit", function(code) {
-      
-      if (code !== 0) {
-        
-        // Could not get the device UP, maybe due to permissions, should run with sudo.
-        self.emit('error','hciconfig: failed to bring up device ' + hcidev +'. Try running with sudo.');
-        return;
-      
-      } else {
-        
-        console.log("hciconfig: succesfully brought up device " + hcidev);
-        
-        // Kill any previous hcitool command
-        var clearHciTool = spawn("killall", ["hcitool"]);
-        
-        clearHciTool.on("exit", function(code) {
-         
-          console.log("hcitool: killed (code " + code + ")");
-          
-          // Need to run this so scan returns actual results on Raspberry Pi devices
-          var hciToolDev = spawn(tool_path + 'hcitool', ['dev']);
-          
-          hciToolDev.on("exit", function(code) {
-            
-            if (code === 1) {
-              
-              self.emit('error', 'hcitool dev: exited, already running? (code 1)');
-              return;
-            
-            } else {
-              
-              console.log("hcitool dev: done (code " + code + ")");
-              
-              // Start scan
-              var hciToolScan = spawn(tool_path + 'hcitool', ['scan']);
-              console.log("hcitool scan: started...");
+    // Inherit EventEmitter
+    EventEmitter.call(self);
 
-              hciToolScan.stdout.on('data', function(data) {
+    self.init = function (option) {
+        var tool_path = "";
+        if (hcidev === 'fake') {
+            tool_path = './';
+        }
+        var hcidev = 'hci0';
+        var macAddr = option['mac'];
+        var hciconfig = spawn('hciconfig', [hcidev, 'up']);
 
-                if ( data.length ) {
-
-                  data = data.toString('ascii');
-
-                  var result;
-                  var re = /((?:[0-9A-F]{2}(?::|)){6})[\t\s]+([^\n\r]+)/gmi;
-
-                  while( (result = re.exec(data)) ) {
-                    self.emit('device', result[1], result[2]);
-                  }
-
-                }
-
-              });
-              
-              hciToolScan.on("exit", function(code) {
-                
-                self.emit('done',"hcitool scan: exited (code " + code + ")");
-                
-              });
-
+        hciconfig.on("exit", function (code) {
+            if (code !== 0) {
+                console.log("Device " + hcidev + "up fail!");
             }
-          });
-        });
-      }
-    });
-  };
-  
-  self.init(hcidev);
+            else {
+                console.log("Device " + hcidev + "up suceed!");
+                //begin Scan
+                var begintime = new Date();
+                // Start skcan
+                var hciToolScan = spawn('hcitool', ['lecc', macAddr])
+                console.log("app.js:" + macAddr)
+
+                hciToolScan.stdout.on('data', function (data) {
+                    if (data.length) {
+                        var endtime = new Date();
+                        console.log("连接成功!");
+                        console.log("设备名称:" + option['name'] + "|mac:" + option['mac']);
+                        var ConnectionTime = (endtime.getTime() - begintime.getTime());
+                        console.log('\t' + "连接时间:" + (endtime.getTime() - begintime.getTime()) + "ms");
+                        data = data.toString('utf-8');
+                    }
+                });
+                hciToolScan.on("exit", function (code) {
+                    console.log("exit:" + code);
+                    var hciconfig = spawn('hciconfig', [hcidev, 'down']);
+                    hciconfig.on("exit", function (code) {
+                        if (code !== 0) {
+                            console.log("Device " + hcidev + "down fail!");
+                        }
+                        else {
+                            console.log("Device " + hcidev + "down suceed!");
+                        }
+                    })
+                });
+            }
+        })
+    };
+
+    self.init(option);
 };
 util.inherits(BluetoothScanner, EventEmitter);
