@@ -11,24 +11,23 @@
  * License: MIT
  */
 var spawn = require('child_process').spawn;
-var dbtool=require('../tests/dbtools');
+var dbtool = require('../tests/dbtools');
 
 
-
-exports.blueHcitool = function(option,callback) {
-    var hcidev='hci0';
-    var macAddr=option['mac'];
+exports.blueHcitool = function (option, callback) {
+    var hcidev = 'hci0';
+    var macAddr = option['mac'];
 // Bring selected device UP
     var hciconfig = spawn('hciconfig', [hcidev, 'up']);
 
-    hciconfig.on("exit", function(code) {
-        if(code!==0){
-            console.log("Device "+hcidev+"up fail!");
-            dbtool.selectCountdb({"mac":macAddr},function (count) {
+    hciconfig.on("exit", function (code) {
+        if (code !== 0) {
+            console.log("Device " + hcidev + "up fail!");
+            dbtool.selectCountdb({"mac": macAddr}, function (count) {
                 connectrRecord =
                 {
-                    "mac":macAddr,
-                    "set":{
+                    "mac": macAddr,
+                    "set": {
                         "hciDeviceFailNum": count[0]["hciDeviceFailNum"] + 1
                     }
                 }
@@ -36,24 +35,19 @@ exports.blueHcitool = function(option,callback) {
             });
         }
         else {
-            console.log("Device "+hcidev+"up suceed!");
+            console.log("Device " + hcidev + "up suceed!");
             //begin Scan
             var begintime = new Date();
             var endtime = new Date();
             // Start skcan
-            var hciToolScan =  spawn('hcitool',['lecc',macAddr])
-            console.log("app.js:"+macAddr)
-            //spawn('hcitool', ['lecc', option['mac']]);
-
-            // console.log("hcitool scan: started...");
-
-
+            var hciToolScan = spawn('hcitool', ['lecc', macAddr])
+            console.log("app.js:" + macAddr);
             hciToolScan.stdout.on('data', function (data) {
                 if (data.length) {
                     var endtime = new Date();
                     console.log("连接成功!");
-                    console.log("设备名称:" +option['name']+"|mac:"+option['mac']);
-                    var ConnectionTime=(endtime.getTime() - begintime.getTime());
+                    console.log("设备名称:" + option['name'] + "|mac:" + option['mac']);
+                    var ConnectionTime = (endtime.getTime() - begintime.getTime());
                     console.log('\t' + "连接时间:" + (endtime.getTime() - begintime.getTime()) + "ms");
                     data = data.toString('utf-8');
 
@@ -61,16 +55,16 @@ exports.blueHcitool = function(option,callback) {
                     if (data.indexOf('Connection handle ') === 0) {
                         var handleValue = data.replace("Connection handle ", "");
                         var handleEndtime = new Date();
-                        var DisconnectionTime=(handleEndtime.getTime() - endtime.getTime());
+                        var DisconnectionTime = (handleEndtime.getTime() - endtime.getTime());
                         console.log('\t' + "断开时间:" + DisconnectionTime + "ms");
-                        var args={
-                            "mac":option['mac'],
-                            "ConnectionTime":ConnectionTime,
-                            "DisconnectTime":DisconnectionTime,
-                            "flag":option['flag'],
-                            "name":option['name'],
-                            "mi":5,
-                            "time":new Date().getTime()
+                        var args = {
+                            "mac": option['mac'],
+                            "ConnectionTime": ConnectionTime,
+                            "DisconnectTime": DisconnectionTime,
+                            "flag": option['flag'],
+                            "name": option['name'],
+                            "mi": 5,
+                            "time": new Date().getTime()
                             // "mobile":"Nexus 5"
                         };
                         dbtool.insertdb(args);
@@ -85,13 +79,13 @@ exports.blueHcitool = function(option,callback) {
                         //     dbtool.updataCountdb(connectrRecord);
                         // });
 
-                        console.log("handlevalue:"+handleValue);
-                        var hciToolScans =spawn('hcitool', ['ledc', handleValue])
-                        dbtool.selectCountdb({"mac":macAddr},function (count) {
+                        console.log("handlevalue:" + handleValue);
+                        var hciToolScans = spawn('hcitool', ['ledc', handleValue])
+                        dbtool.selectCountdb({"mac": macAddr}, function (count) {
                             connectrRecord =
                             {
-                                "mac":macAddr,
-                                "set":{
+                                "mac": macAddr,
+                                "set": {
                                     "normalDisconSum": count[0]["normalDisconSum"] + 1
                                 }
                             }
@@ -107,20 +101,19 @@ exports.blueHcitool = function(option,callback) {
             });
 
 
-
             hciToolScan.on("exit", function (code) {
                 console.log("exit:" + code);
 
-                if(code===1) {
+                if (code === 1) {
                     dbtool.selecthandledb(function (datas) {
                         // console.log("BleHandle:"+datas);
                         console.log("BleHandle:" + datas[0]["value"]);
                         var hciToolScans = spawn('hcitool', ['ledc', datas[0]["value"]])
-                        dbtool.selectCountdb({"mac":macAddr},function (count) {
+                        dbtool.selectCountdb({"mac": macAddr}, function (count) {
                             connectrRecord =
                             {
-                                "mac":macAddr,
-                                "set":{
+                                "mac": macAddr,
+                                "set": {
                                     "disconFai": count[0]["disconFai"] + 1,
                                     "unormalDisconSum": count[0]["unormalDisconSum"] + 1
                                 }
@@ -134,13 +127,12 @@ exports.blueHcitool = function(option,callback) {
 
                     });
                 }
-                else if(code===0)
-                {
-                    dbtool.selectCountdb({"mac":macAddr},function (count) {
+                else if (code === 0) {
+                    dbtool.selectCountdb({"mac": macAddr}, function (count) {
                         connectrRecord =
                         {
-                            "mac":macAddr,
-                            "set":{
+                            "mac": macAddr,
+                            "set": {
                                 "conSuc": count[0]["conSuc"] + 1
                             }
 
@@ -150,17 +142,16 @@ exports.blueHcitool = function(option,callback) {
                 }
                 // self.emit('done', "hcitool scan: exited (code " + code + ")");
                 var hciconfig = spawn('hciconfig', [hcidev, 'down']);
-                hciconfig.on("exit", function(code) {
-                    if(code!==0){
-                        console.log("Device "+hcidev+"down fail!");
+                hciconfig.on("exit", function (code) {
+                    if (code !== 0) {
+                        console.log("Device " + hcidev + "down fail!");
                     }
                     else {
-                        console.log("Device "+hcidev+"down suceed!");
+                        console.log("Device " + hcidev + "down suceed!");
                     }
                 })
             });
         }
-
 
 
     })
