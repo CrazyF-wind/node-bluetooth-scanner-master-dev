@@ -1,10 +1,11 @@
 /**
  * Bluetooth scanner using Bluez tools
  */
+var dbtool = require('./tests/dbtools');
 var spawn = require('child_process').spawn;
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
-var dbtool = require('./tests/dbtools');
+
 
 var BluetoothScanner = module.exports = function (option, callback) {
     var self = this;
