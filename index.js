@@ -30,16 +30,12 @@ var BluetoothScanner = module.exports = function (option, callback) {
         hciconfig.on("exit", function (code) {
             if (code !== 0) {
                 console.log("Device " + hcidev + "up fail!");
-                dbtool.selectCountdb({"mac": macAddr}, function (count) {
-                    connectrRecord =
-                    {
-                        "mac": macAddr,
-                        "set": {
-                            "hciDeviceFailNum": count[0]["hciDeviceFailNum"] + 1
-                        }
-                    }
-                    dbtool.updataCountdb(connectrRecord);
-                });
+                connectrRecord =
+                {
+                    "mac": macAddr,
+                    "set": "hciDeviceFailNum"
+                }
+                dbtool.updataCountdb(connectrRecord);
             }
             else {
                 console.log("Device " + hcidev + "up suceed!");
@@ -63,16 +59,12 @@ var BluetoothScanner = module.exports = function (option, callback) {
                             var handleValue = data.replace("Connection handle ", "");
                             console.log("handlevalue:" + handleValue);
                             var hciToolScans = spawn('hcitool', ['ledc', handleValue]);
-                            dbtool.selectCountdb({"mac": macAddr}, function (count) {
-                                connectrRecord =
-                                {
-                                    "mac": macAddr,
-                                    "set": {
-                                        "normalDisconSum": count[0]["normalDisconSum"] + 1
-                                    }
-                                }
-                                dbtool.updataCountdb(connectrRecord);
-                            });
+                            connectrRecord =
+                            {
+                                "mac": macAddr,
+                                "set": "normalDisconSum"
+                            }
+                            dbtool.updataCountdb(connectrRecord)
                             hciToolScans.stdout.on('data', function (data) {
                                 data = data.toString('ascii');
                                 console.log("ledc:" + data);
@@ -104,20 +96,22 @@ var BluetoothScanner = module.exports = function (option, callback) {
 
                     if (code === 1) {
                         dbtool.selecthandledb(function (datas) {
-                            // console.log("BleHandle:"+datas);
                             console.log("BleHandle:" + datas[0]["value"]);
                             var hciToolScans = spawn('hcitool', ['ledc', datas[0]["value"]])
-                            dbtool.selectCountdb({"mac": macAddr}, function (count) {
-                                connectrRecord =
-                                {
-                                    "mac": macAddr,
-                                    "set": {
-                                        "disconFai": count[0]["disconFai"] + 1,
-                                        "unormalDisconSum": count[0]["unormalDisconSum"] + 1
-                                    }
-                                }
-                                dbtool.updataCountdb(connectrRecord);
-                            });
+
+                            connectrRecord =
+                            {
+                                "mac": macAddr,
+                                "set": "disconFai"
+                            }
+                            dbtool.updataCountdb(connectrRecord);
+                            connectrRecord =
+                            {
+                                "mac": macAddr,
+                                "set": "unormalDisconSum"
+                            }
+                            dbtool.updataCountdb(connectrRecord);
+
                             hciToolScans.stdout.on('data', function (data) {
                                 data = data.toString('ascii');
                                 console.log("ledc:" + data);
@@ -126,16 +120,12 @@ var BluetoothScanner = module.exports = function (option, callback) {
                         });
                     }
                     else if (code === 0) {
-                        dbtool.selectCountdb({"mac": macAddr}, function (count) {
-                            connectrRecord =
-                            {
-                                "mac": macAddr,
-                                "set": {
-                                    "conSuc": count[0]["conSuc"] + 1
-                                }
-                            }
-                            dbtool.updataCountdb(connectrRecord);
-                        })
+                        connectrRecord =
+                        {
+                            "mac": macAddr,
+                            "set": "conSuc"
+                        }
+                        dbtool.updataCountdb(connectrRecord);
                     }
                     // self.emit('done', "hcitool scan: exited (code " + code + ")");
                     var hciconfig = spawn('hciconfig', [hcidev, 'down']);

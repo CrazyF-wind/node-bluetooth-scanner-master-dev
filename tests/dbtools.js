@@ -120,7 +120,7 @@ exports.selectCountdb = function (args, callback) {
                 return err;
             }
             collection.find(args).toArray(function (err, docs) {
-                console.log("docs:"+JSON.stringify(docs)+","+err);
+                console.log("docs:" + JSON.stringify(docs) + "," + err);
                 mongodb.close();
                 if (err) {
                     return err;
@@ -146,8 +146,33 @@ exports.updataCountdb = function (args) {
                 mongodb.close();
                 return err;
             }
-            var data = [args];
-            collection.update({"mac": data[0]["mac"]}, {$set: data[0]["set"]}, function (err, result) {
+            //collection.update({"mac": data[0]["mac"]}, {$set: data[0]["set"]}, function (err, result) {
+            var set = "";
+            switch (args["set"]) {
+                case "normalDisconSum":
+                    set = {"normalDisconSum": 1};
+                    break;
+                case "conFai":
+                    set = {"conFai": 1};
+                    break;
+                case "disconSuc":
+                    set = {"disconSuc": 1};
+                    break;
+                case "disconFai":
+                    set = {"disconFai": 1};
+                    break;
+                case "unormalDisconSum":
+                    set = {"unormalDisconSum": 1};
+                    break;
+                case "hciDeviceFailNum":
+                    set = {"hciDeviceFailNum": 1};
+                    break;
+                case "conSuc":
+                    set = {"conSuc": 1};
+                    break;
+            }
+
+            collection.update({"mac": args["mac"]}, {"$inc": set}, function (err, result) {
                 mongodb.close();
                 if (err) {
                     return err;
