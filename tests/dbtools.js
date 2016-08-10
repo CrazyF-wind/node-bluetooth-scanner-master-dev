@@ -1,80 +1,44 @@
-var mongodb = require('andon-bluetooth-database');
+var dbhelper =require('andon-bluetooth-database');
+    //require('./mongodbhelper.js');
 
 /**
  * 新增扫描记录
  * @param args
  */
 exports.insertdb = function (args) {
-    mongodb.open(function (err, db) {
-        if (err) {
-            return err;
+    dbhelper.insertMongo('BleConnectTimers', args, function (result) {
+        if (result === "ok") {
+            console.log("新增扫描记录成功！")
         }
-        //读取 posts 集合
-        db.collection('BleConnectTimers', function (err, collection) {
-            if (err) {
-                mongodb.close();
-            }
-            var data = [args];
-            collection.insert(data, function (err, result) {
-                if (err) {
-                    return err;
-                }
-                mongodb.close();
-            });
-        });
+        else {
+            console.log("新增扫描记录失败，原因：" + result);
+        }
     });
 }
 
 /**
- *查询handle
+ *查询handle(弃用)
  * @param callback
  */
 exports.selecthandledb = function (callback) {
-
-    mongodb.open(function (err, db) {
-        if (err) {
-            return err;
-        }
-        //读取 posts 集合
-        db.collection('BleCookie', function (err, collection) {
-            if (err) {
-                mongodb.close();
-                return err;
-            }
-            collection.find({"name": "defaulthandle"}).toArray(function (err, docs) {
-                mongodb.close();
-                if (err) {
-                    return err;
-                }
-                callback(docs);
-            });
-        });
+    dbhelper.selectMongo('BleCookie', {"name": "defaulthandle"}, function (result) {
+        callback(result);
+        console.log("查询handle成功！")
     });
 }
 
 /**
- * 更新handle
+ * 更新handle(弃用)
  * @param args
  */
 exports.updatahandledb = function (args) {
-    mongodb.open(function (err, db) {
-        if (err) {
-            return err;
+    dbhelper.updataMongo('BleCookie', {"name": "defaulthandle"}, {$set: {value: args}}, function (result) {
+        if (result === "ok") {
+            console.log("更新handle成功！")
         }
-        //读取 posts 集合
-        db.collection('BleCookie', function (err, collection) {
-            if (err) {
-                mongodb.close();
-                return err;
-            }
-            var data = [args];
-            collection.update({name: 'defaulthandle'}, {$set: {value: data}}, function (err, result) {
-                mongodb.close();
-                if (err) {
-                    return err;
-                }
-            });
-        });
+        else {
+            console.log("更新handle失败，原因：" + result);
+        }
     });
 }
 
@@ -83,25 +47,14 @@ exports.updatahandledb = function (args) {
  * @param args
  */
 exports.insertCountdb = function (args) {
-    mongodb.open(function (err, db) {
-        if (err) {
-            return err;
+    dbhelper.insertMongo('BleConnectCount', args, function (result) {
+        if (result === "ok") {
+            console.log("新增统计记录成功！")
         }
-        //读取 posts 集合
-        db.collection('BleConnectCount', function (err, collection) {
-            if (err) {
-                mongodb.close();
-            }
-            var data = [args];
-            collection.insert(data, function (err, result) {
-                if (err) {
-                    return err;
-                }
-                mongodb.close();
-            });
-        });
+        else {
+            console.log("新增统计记录失败，原因：" + result);
+        }
     });
-
 }
 
 /**
@@ -109,25 +62,9 @@ exports.insertCountdb = function (args) {
  * @param callback
  */
 exports.selectCountdb = function (args, callback) {
-    mongodb.open(function (err, db) {
-        if (err) {
-            return err;
-        }
-        //读取 posts 集合
-        db.collection('BleConnectCount', function (err, collection) {
-            if (err) {
-                mongodb.close();
-                return err;
-            }
-            collection.find(args).toArray(function (err, docs) {
-                console.log("docs:" + JSON.stringify(docs) + "," + err);
-                mongodb.close();
-                if (err) {
-                    return err;
-                }
-                callback(docs);
-            });
-        });
+    dbhelper.selectMongo('BleConnectCount', args, function (result) {
+        callback(result);
+        console.log("查询count成功！")
     });
 }
 
@@ -136,49 +73,37 @@ exports.selectCountdb = function (args, callback) {
  * @param args
  */
 exports.updataCountdb = function (args) {
-    mongodb.open(function (err, db) {
-        if (err) {
-            return err;
+    var set = "";
+    switch (args["set"]) {
+        case "normalDisconSum":
+            set = {"normalDisconSum": 1};
+            break;
+        case "conFai":
+            set = {"conFai": 1};
+            break;
+        case "disconSuc":
+            set = {"disconSuc": 1};
+            break;
+        case "disconFai":
+            set = {"disconFai": 1};
+            break;
+        case "unormalDisconSum":
+            set = {"unormalDisconSum": 1};
+            break;
+        case "hciDeviceFailNum":
+            set = {"hciDeviceFailNum": 1};
+            break;
+        case "conSuc":
+            set = {"conSuc": 1};
+            break;
+    }
+    dbhelper.updataMongo('BleConnectCount', {"mac": args["mac"]}, {"$inc": set}, function (result) {
+        if (result === "ok") {
+            console.log("更新count成功！")
         }
-        //读取 posts 集合
-        db.collection('BleConnectCount', function (err, collection) {
-            if (err) {
-                mongodb.close();
-                return err;
-            }
-            //collection.update({"mac": data[0]["mac"]}, {$set: data[0]["set"]}, function (err, result) {
-            var set = "";
-            switch (args["set"]) {
-                case "normalDisconSum":
-                    set = {"normalDisconSum": 1};
-                    break;
-                case "conFai":
-                    set = {"conFai": 1};
-                    break;
-                case "disconSuc":
-                    set = {"disconSuc": 1};
-                    break;
-                case "disconFai":
-                    set = {"disconFai": 1};
-                    break;
-                case "unormalDisconSum":
-                    set = {"unormalDisconSum": 1};
-                    break;
-                case "hciDeviceFailNum":
-                    set = {"hciDeviceFailNum": 1};
-                    break;
-                case "conSuc":
-                    set = {"conSuc": 1};
-                    break;
-            }
-
-            collection.update({"mac": args["mac"]}, {"$inc": set}, function (err, result) {
-                mongodb.close();
-                if (err) {
-                    return err;
-                }
-            });
-        });
+        else {
+            console.log("更新count失败，原因：" + result);
+        }
     });
 }
 
@@ -188,49 +113,29 @@ exports.updataCountdb = function (args) {
  * @param args
  */
 exports.insertDeviceInfodb = function (args) {
-    mongodb.open(function (err, db) {
-        if (err) {
-            return err;
+    dbhelper.insertMongo('BleDeviceInfo', args, function (result) {
+        if (result === "ok") {
+            console.log("新增扫描设备成功！")
         }
-        //读取 posts 集合
-        db.collection('BleDeviceInfo', function (err, collection) {
-            if (err) {
-                mongodb.close();
-            }
-            var data = [args];
-            collection.insert(data, function (err, result) {
-                if (err) {
-                    return err;
-                }
-                mongodb.close();
-            });
-        });
+        else {
+            console.log("新增扫描设备失败，原因：" + result);
+        }
     });
 }
 
 /**
- * 更新扫描设备，存入缓存
+ * 更新扫描设备，存入缓存（暂时没用）
  * @param args
  */
 exports.updataDeviceInfodb = function (args) {
-    mongodb.open(function (err, db) {
-        if (err) {
-            return err;
+    var data = [args];
+    dbhelper.updataMongo('BleConnectCount', {"mac": data[0]["mac"]}, {$set: data[0]["set"]}, function (result) {
+        if (result === "ok") {
+            console.log("更新扫描设备成功！")
         }
-        //读取 posts 集合
-        db.collection('BleDeviceInfo', function (err, collection) {
-            if (err) {
-                mongodb.close();
-                return err;
-            }
-            var data = [args];
-            collection.update({"mac": data[0]["mac"]}, {$set: data[0]["set"]}, function (err, result) {
-                mongodb.close();
-                if (err) {
-                    return err;
-                }
-            });
-        });
+        else {
+            console.log("更新扫描设备失败，原因：" + result);
+        }
     });
 }
 

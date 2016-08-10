@@ -2,7 +2,9 @@
  * Created by Administrator on 2016/8/8.
  */
 var MongoClient = require('mongodb').MongoClient;
-var DB_CONN_STR = 'mongodb://10.0.0.5:27017/wilsondb1';
+//var DB_CONN_STR = 'mongodb://10.0.0.5:27017/wilsondb1';
+var DB_CONN_STR= require('andon-bluetooth-database').DB_CONN_STR;
+
 /**
  * 查询扫描记录
  * @param callback
