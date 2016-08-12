@@ -18,13 +18,14 @@ var BluetoothScanner = module.exports = function (option, callback) {
         if (hcidev === 'fake') {
             tool_path = './';
         }
-        console.log("connect index:"+JSON.stringify(option));
+        console.log("connect index:" + JSON.stringify(option));
         var hcidev = 'hci0';
         var macAddr = option['mac'];
         var mobile = option['mobile'];
         var devicename = option['name'];
         var mi = option['mi'];
         var flag = option['flag'];
+        var mobileopt=option['mobileopt'];
         // Bring selected device UP
         var hciconfig = spawn('hciconfig', [hcidev, 'up']);
 
@@ -44,7 +45,8 @@ var BluetoothScanner = module.exports = function (option, callback) {
                 var begintime = new Date();
                 var endtime = new Date();
                 // Start skcan
-                var hciToolScan = spawn('hcitool', ['lecc', macAddr])
+                //var hciToolScan = spawn('hcitool', ['lecc', macAddr])
+                var hciToolScan = spawn('hcitool', ['EdInt', macAddr,mobileopt["interval"],mobileopt["window"],mobileopt["min_interval"],mobileopt["max_interval"]])
                 console.log("hcitool lecc: started...");
                 console.log("connect:" + macAddr);
                 hciToolScan.stdout.on('data', function (data) {
@@ -65,17 +67,13 @@ var BluetoothScanner = module.exports = function (option, callback) {
                                 "mac": macAddr,
                                 "set": "normalDisconSum"
                             }
-                            dbtool.updataCountdb(connectrRecord)
-                            //hciToolScans.stdout.on('data', function (data) {
-                            //    data = data.toString('ascii');
-                            //    console.log("ledc:" + data);
-                            //});
+                            dbtool.updataCountdb(connectrRecord);
                             //扫描记录存库、handle更新，返回成功结果
                             var handleEndtime = new Date();
                             var DisconnectionTime = (handleEndtime.getTime() - endtime.getTime());
                             console.log('\t' + "断开时间:" + DisconnectionTime + "ms");
                             var args = {
-                                "mac":macAddr,
+                                "mac": macAddr,
                                 "ConnectionTime": ConnectionTime,
                                 "DisconnectTime": DisconnectionTime,
                                 "flag": flag,

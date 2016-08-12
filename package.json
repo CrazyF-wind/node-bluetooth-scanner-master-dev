@@ -1,6 +1,6 @@
 {
   "name": "andon-bluetooth-connect-temp",
-  "version": "1.0.28",
+  "version": "1.0.33",
   "description": "Bluetooth 4.0 LE scanner to find near by Bluetooth devices.",
   "main": "index.js",
   "scripts": {
