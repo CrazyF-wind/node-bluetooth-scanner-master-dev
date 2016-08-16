@@ -21,7 +21,7 @@ exports.insertdb = function (args) {
  * @param callback
  */
 exports.selecthandledb = function (callback) {
-    dbhelper.selectMongo('BleCookie', {"name": "defaulthandle"}, function (result) {
+    dbhelper.selectMongo('BleCookie', {"name": "defaulthandle"},{}, function (result) {
         callback(result);
         console.log("查询handle成功！")
     });
@@ -62,7 +62,7 @@ exports.insertCountdb = function (args) {
  * @param callback
  */
 exports.selectCountdb = function (args, callback) {
-    dbhelper.selectMongo('BleConnectCount', args, function (result) {
+    dbhelper.selectMongo('BleConnectCount', args,{}, function (result) {
         callback(result);
         console.log("查询count成功！")
     });
