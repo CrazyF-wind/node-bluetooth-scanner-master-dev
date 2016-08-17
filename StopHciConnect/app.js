@@ -11,7 +11,7 @@
  * License: MIT
  */
 var spawn = require('child_process').spawn;
-var dbtool = require('../tests/dbtools');
+var dbtool = require('../tests/old-dbtools');
 
 
 exports.blueHcitool = function (option, callback) {
@@ -21,6 +21,10 @@ exports.blueHcitool = function (option, callback) {
     var hciconfig = spawn('hciconfig', [hcidev, 'up']);
 
     hciconfig.on("exit", function (code) {
+
+
+
+
         if (code !== 0) {
             console.log("Device " + hcidev + "up fail!");
             dbtool.selectCountdb({"mac": macAddr}, function (count) {
@@ -36,15 +40,22 @@ exports.blueHcitool = function (option, callback) {
         }
         else {
             console.log("Device " + hcidev + "up suceed!");
+            //开始扫描mac
+            bleScanner = new LeScanner(option, function (data) {
+                console.log("返回扫描结果:" + JSON.stringify(data));
+
+            });
+
             //begin Scan
             var begintime = new Date();
             var endtime = new Date();
             // Start skcan
-            var hciToolScan = spawn('hcitool', ['lecc', macAddr])
+            var hciToolScan = spawn('hcitool', ['lecc', macAddr]);
             console.log("app.js:" + macAddr);
             hciToolScan.stdout.on('data', function (data) {
                 if (data.length) {
                     var endtime = new Date();
+                    console.log(data.toString('utf-8'));
                     console.log("连接成功!");
                     console.log("设备名称:" + option['name'] + "|mac:" + option['mac']);
                     var ConnectionTime = (endtime.getTime() - begintime.getTime());

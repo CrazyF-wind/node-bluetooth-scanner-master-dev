@@ -2,21 +2,21 @@
 // var Scanner, bleScanner, callback;
 
 var Scanner = require("../StopHciConnect/app.js");
-var dbtools = require('../tests/dbtools');
+var dbtools = require('../tests/old-dbtools');
 
 var options = process.argv;
 
 //scan foreach
-dbtools.selectdb(function (data) {
+//dbtools.selectdb(function (data) {
     var option =
     {
-        "name": options[4],
-        "mac": options[2], 
-        "flag": options[3]
+        "name": "AM3S",
+        "mac": "00:4d:32:06:24:d1",
+        "flag": "11"
     };
     // Scanner("hci0",option);
     Scanner.blueHcitool(option, function (datas) {
         // console.log("data:"+datas);
     });
-});
+//});
 
