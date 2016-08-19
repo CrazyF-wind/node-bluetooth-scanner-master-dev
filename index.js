@@ -31,6 +31,8 @@ var BluetoothScanner = module.exports = function (option, callback) {
         // Bring selected device UP
         var hciconfig = spawn('hciconfig', [hcidev, 'up']);
 
+        var args={};
+
         hciconfig.on("exit", function (code) {
             if (code !== 0) {
                 console.log("Device " + hcidev + "up fail!");

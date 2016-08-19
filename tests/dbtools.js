@@ -17,7 +17,22 @@ exports.insertdb = function (args) {
 }
 
 /**
- *查询handle(弃用)
+ * 更新最新一条扫描记录
+ * @param callback
+ */
+exports.updatalastdb = function (args) {
+    dbhelper.updataMongo('BleConnectTimers', {"time": args["time"]}, {$set: {"ble_down": args["ble_down"]}}, function (result) {
+        if (result === "ok") {
+            console.log("更新最新一条扫描记录成功！")
+        }
+        else {
+            console.log("更新最新一条扫描记录失败，原因：" + result);
+        }
+    });
+}
+
+/**
+ *查询handle
  * @param callback
  */
 exports.selecthandledb = function (callback) {
@@ -28,7 +43,7 @@ exports.selecthandledb = function (callback) {
 }
 
 /**
- * 更新handle(弃用)
+ * 更新handle
  * @param args
  */
 exports.updatahandledb = function (args) {
