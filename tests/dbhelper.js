@@ -107,7 +107,7 @@ exports.updataMongo = function (tablename, where, sets, callback) {
  * @param option upsert: <boolean>,multi: <boolean>,writeConcern: <document>
  * @callback 返回结果
  */
-exports.updataMongoWithOption = function (tablename, where, sets,option, callback) {
+exports.updateMongoWithOption = function (tablename, where, sets,option, callback) {
     //重新连接数据库
     if (!mongodb.openCalled) {
         mongodb.open(function (err, db) {
