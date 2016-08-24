@@ -158,6 +158,7 @@ exports.updataDeviceInfodb = function (args) {
  * @param args
  */
 exports.updateStatisticsdb = function (args) {
+    var data = [args];
     dbhelper.updataMongoWithOption('BleConnectCount', {"mac": data[0]["mac"]}, {$inc: data[0]["inc"]},{upsert:true}, function (result) {
         if (result === "ok") {
             console.log("更新统计信息成功！")
