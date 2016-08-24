@@ -51,20 +51,17 @@ var BluetoothScanner = module.exports = function (option, callback) {
             //启动蓝牙失败
             if (code !== 0) {
                 console.log("hcitool Device " + hcidev + "up fail!");
-                args = {
+                //写入统计库
+                args={
                     "mac": macAddr,
-                    "ConnectionTime": 0,
-                    "DisconnectTime": 0,
                     "flag": flag,
-                    "name": devicename,
                     "mi": mi,
-                    "time": record_time,
                     "mobile": mobile,
-                    "LescanTime": 0,
-                    "RSSI": 0,
-                    "ble_up": 0
+                    "inc":{
+                        "deviceup_failed":1
+                    }
                 };
-                dbtool.insertdb(args);
+                dbtool.updateStatisticsdb(args);
                 callback({"result": 0, "value": "蓝牙启动失败！"});
             }
             else {
@@ -115,10 +112,35 @@ var BluetoothScanner = module.exports = function (option, callback) {
 
                                         if (code !== 0) {
                                             console.log("lecc succeed ledc failed!");
-                                            ledc_Once = 1;
+                                            //写入统计库
+                                            args={
+                                                "mac": macAddr,
+                                                "flag": flag,
+                                                "mi": mi,
+                                                "mobile": mobile,
+                                                "inc":{
+                                                    "ledc_failed":1,
+                                                    "lescan_": 1,
+                                                    "lecc": 1
+                                                }
+                                            };
+                                            dbtool.updateStatisticsdb(args);
+                                            // ledc_Once = 1;
                                         } else {
                                             console.log("lecc succeed ledc succeed!");
-                                            ledc_Once = 0;
+                                            //写入统计库
+                                            args={
+                                                "mac": macAddr,
+                                                "flag": flag,
+                                                "mi": mi,
+                                                "mobile": mobile,
+                                                "inc":{
+                                                    "ledc_success":1,
+                                                    "lescan": 1,
+                                                    "lecc": 1
+                                                }
+                                            };
+                                            // ledc_Once = 0;
                                         }
 
                                         args = {
@@ -131,11 +153,7 @@ var BluetoothScanner = module.exports = function (option, callback) {
                                             "time": record_time,
                                             "mobile": mobile,
                                             "LescanTime": lescan_time,
-                                            "RSSI": RSSI,
-                                            "ble_up": 1,
-                                            "lescan": 1,
-                                            "lecc": 1,
-                                            "ledc_once": ledc_Once
+                                            "RSSI": RSSI
                                         };
                                         dbtool.insertdb(args);
                                     });
@@ -154,35 +172,45 @@ var BluetoothScanner = module.exports = function (option, callback) {
                         hciToolScan.on("exit", function (code) {
                             console.log("exit:" + code);
                             if (code !== 0) {
+                                //第一次连接失败
                                 console.log("lecc(edint) " + macAddr + " failed!");
                                 dbtool.selecthandledb(function (datas) {
                                     console.log("BleHandle:" + datas[0]["value"]);
+                                    //第二次断开
                                     var hciToolScans = spawn('hcitool', ['ledc', datas[0]["value"]]);
                                     hciToolScans.on('exit', function (code) {
                                         if (code !== 0) {
                                             console.log("lecc failed ledc failed!");
-                                            ledc_Twice = 0;
+                                            //写入统计库
+                                            args={
+                                                "mac": macAddr,
+                                                "flag": flag,
+                                                "mi": mi,
+                                                "mobile": mobile,
+                                                "inc":{
+                                                    "lecc_failed":1,
+                                                    "ledc_failed":1,
+                                                    "ledc_Twice":1
+                                                }
+                                            };
+                                            dbtool.updateStatisticsdb(args);
+                                            // ledc_Twice = 0;
                                         } else {
                                             console.log("lecc failed ledc succeed!");
-                                            ledc_Twice = 1;
+                                            //写入统计库
+                                            args={
+                                                "mac": macAddr,
+                                                "flag": flag,
+                                                "mi": mi,
+                                                "mobile": mobile,
+                                                "inc":{
+                                                    "lecc_failed":1,
+                                                    "ledc_failed":1
+                                                }
+                                            };
+                                            dbtool.updateStatisticsdb(args);
+                                            // ledc_Twice = 1;
                                         }
-                                        args = {
-                                            "mac": macAddr,
-                                            "ConnectionTime": connect_time,
-                                            "DisconnectTime": disconnect_time,
-                                            "flag": flag,
-                                            "name": devicename,
-                                            "mi": mi,
-                                            "time": record_time,
-                                            "mobile": mobile,
-                                            "LescanTime": lescan_time,
-                                            "RSSI": RSSI,
-                                            "ble_up": 1,
-                                            "lescan": 1,
-                                            "lecc": 0,
-                                            "ledc_twice": ledc_Twice
-                                        };
-                                        dbtool.insertdb(args);
                                     });
                                     callback({"result": 0, "value": "失败！扫描时间：" + lescan_time + "ms！"});
                                 });
@@ -196,17 +224,33 @@ var BluetoothScanner = module.exports = function (option, callback) {
                             hciconfig.on("exit", function (code) {
                                 if (code !== 0) {
                                     console.log("Device " + hcidev + "down failed!");
-                                    ble_down = 0;
+                                    //写入统计库
+                                    args={
+                                        "mac": macAddr,
+                                        "flag": flag,
+                                        "mi": mi,
+                                        "mobile": mobile,
+                                        "inc":{
+                                            "devicedown_failed":1
+                                        }
+                                    };
+                                    dbtool.updateStatisticsdb(args);
                                 }
                                 else {
                                     console.log("Device " + hcidev + "down succeed!");
-                                    ble_down = 1;
+                                    //写入统计库
+                                    args={
+                                        "mac": macAddr,
+                                        "flag": flag,
+                                        "mi": mi,
+                                        "mobile": mobile,
+                                        "inc":{
+                                            "devicedown_success":1
+                                        }
+                                    };
+                                    dbtool.updateStatisticsdb(args);
                                 }
-                                args = {
-                                    "time": record_time,
-                                    "ble_down": ble_down
-                                };
-                                dbtool.updatalastdb(args);
+
                                 //callback({"result": 0, "value": "蓝牙断开失败！"});
                             });
 
@@ -219,7 +263,17 @@ var BluetoothScanner = module.exports = function (option, callback) {
                         hciconfig.on("exit", function (code) {
                             if (code !== 0) {
                                 console.log("hcitool Device " + hcidev + "down fail!");
-                                ble_down = 0;
+                                //写入统计库
+                                args={
+                                    "mac": macAddr,
+                                    "flag": flag,
+                                    "mi": mi,
+                                    "mobile": mobile,
+                                    "inc":{
+                                        "devicedown_failed":1
+                                    }
+                                };
+                                dbtool.updateStatisticsdb(args);
                             }
                             else {
                                 console.log("hcitool Device " + hcidev + "down suceed!");
