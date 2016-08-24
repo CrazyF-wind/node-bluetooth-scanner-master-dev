@@ -120,7 +120,7 @@ var BluetoothScanner = module.exports = function (option, callback) {
                                                 "mobile": mobile,
                                                 "inc":{
                                                     "ledc_failed":1,
-                                                    "lescan_": 1,
+                                                    "lescan": 1,
                                                     "lecc": 1
                                                 }
                                             };
@@ -140,6 +140,7 @@ var BluetoothScanner = module.exports = function (option, callback) {
                                                     "lecc": 1
                                                 }
                                             };
+                                            dbtool.updateStatisticsdb(args);
                                             // ledc_Once = 0;
                                         }
 
