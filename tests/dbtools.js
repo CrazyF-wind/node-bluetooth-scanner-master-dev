@@ -154,12 +154,17 @@ exports.updataDeviceInfodb = function (args) {
     });
 }
 /**
- * 
+ * 更新统计数据
  * @param args
  */
 exports.updateStatisticsdb = function (args) {
     var data = [args];
-    dbhelper.updateMongoWithOption('BleConnectStatistics', {"mac": data[0]["mac"]}, {$inc: data[0]["inc"]},{upsert:true}, function (result) {
+    dbhelper.updateMongoWithOption('BleConnectStatistics', {"mac": data[0]["mac"],
+        "flag":data[0]["flag"],
+        "mi":data[0]["mi"],
+        "mobile":data[0]["mobile"],
+        "name":data[0]["name"],
+    }, {$inc: data[0]["inc"]},{upsert:true}, function (result) {
         if (result === "ok") {
             console.log("更新统计信息成功！")
         }

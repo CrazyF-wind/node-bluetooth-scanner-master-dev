@@ -57,6 +57,7 @@ var BluetoothScanner = module.exports = function (option, callback) {
                     "flag": flag,
                     "mi": mi,
                     "mobile": mobile,
+                    "name":devicename,
                     "inc":{
                         "deviceup_failed":1
                     }
@@ -69,6 +70,10 @@ var BluetoothScanner = module.exports = function (option, callback) {
                 //扫描参数
                 var scan_params = {
                     "mac": macAddr,
+                    "flag": flag,
+                    "mi": mi,
+                    "mobile": mobile,
+                    "name":devicename,
                     "parameter": {
                         "interval": mobileopt["scan-interval"],
                         "window": mobileopt["scan-window"]
@@ -118,6 +123,7 @@ var BluetoothScanner = module.exports = function (option, callback) {
                                                 "flag": flag,
                                                 "mi": mi,
                                                 "mobile": mobile,
+                                                "name":devicename,
                                                 "inc":{
                                                     "ledc_failed":1,
                                                     "lescan": 1,
@@ -134,6 +140,7 @@ var BluetoothScanner = module.exports = function (option, callback) {
                                                 "flag": flag,
                                                 "mi": mi,
                                                 "mobile": mobile,
+                                                "name":devicename,
                                                 "inc":{
                                                     "ledc_success":1,
                                                     "lescan": 1,
@@ -188,6 +195,7 @@ var BluetoothScanner = module.exports = function (option, callback) {
                                                 "flag": flag,
                                                 "mi": mi,
                                                 "mobile": mobile,
+                                                "name":devicename,
                                                 "inc":{
                                                     "lecc_failed":1,
                                                     "ledc_failed":1,
@@ -204,6 +212,7 @@ var BluetoothScanner = module.exports = function (option, callback) {
                                                 "flag": flag,
                                                 "mi": mi,
                                                 "mobile": mobile,
+                                                "name":devicename,
                                                 "inc":{
                                                     "lecc_failed":1,
                                                     "ledc_failed":1
@@ -231,6 +240,7 @@ var BluetoothScanner = module.exports = function (option, callback) {
                                         "flag": flag,
                                         "mi": mi,
                                         "mobile": mobile,
+                                        "name":devicename,
                                         "inc":{
                                             "devicedown_failed":1
                                         }
@@ -245,6 +255,7 @@ var BluetoothScanner = module.exports = function (option, callback) {
                                         "flag": flag,
                                         "mi": mi,
                                         "mobile": mobile,
+                                        "name":devicename,
                                         "inc":{
                                             "devicedown_success":1
                                         }
@@ -270,6 +281,7 @@ var BluetoothScanner = module.exports = function (option, callback) {
                                     "flag": flag,
                                     "mi": mi,
                                     "mobile": mobile,
+                                    "name":devicename,
                                     "inc":{
                                         "devicedown_failed":1
                                     }
@@ -278,25 +290,21 @@ var BluetoothScanner = module.exports = function (option, callback) {
                             }
                             else {
                                 console.log("hcitool Device " + hcidev + "down suceed!");
-                                ble_down = 1;
+                                //写入统计库
+                                args={
+                                    "mac": macAddr,
+                                    "flag": flag,
+                                    "mi": mi,
+                                    "mobile": mobile,
+                                    "name":devicename,
+                                    "inc":{
+                                        "devicedown_success":1
+                                    }
+                                };
+                                dbtool.updateStatisticsdb(args);
                             }
 
-                            args = {
-                                "mac": macAddr,
-                                "ConnectionTime": 0,
-                                "DisconnectTime": 0,
-                                "flag": flag,
-                                "name": devicename,
-                                "mi": mi,
-                                "time": record_time,
-                                "mobile": mobile,
-                                "LescanTime": 0,
-                                "RSSI": 0,
-                                "ble_up": 1,
-                                "lescan": 0,
-                                "ble_down": ble_down
-                            };
-                            dbtool.insertdb(args);
+
                             callback({"result": 0, "value": "失败！扫描超时！"});
                         });
                     }
