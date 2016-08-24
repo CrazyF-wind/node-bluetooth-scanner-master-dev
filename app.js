@@ -107,8 +107,8 @@ var BluetoothScanner = module.exports = function (option, callback) {
                                     console.log("handlevalue:" + handleValue);
                                     var handleEndtime = new Date();
                                     //断开操作
-                                    var hciToolScans = spawn('hcitool', ['ledc', handleValue]);
-                                    hciToolScans.on('exit', function (code) {
+                                    var hciToolLedc = spawn('hcitool', ['ledc', handleValue]);
+                                    hciToolLedc.on('exit', function (code) {
                                         disconnect_time = (new Date().getTime() - handleEndtime);
                                         //console.log("断开成功!");
                                         console.log('\t' + "断开时间:" + disconnect_time + "ms");
@@ -142,10 +142,10 @@ var BluetoothScanner = module.exports = function (option, callback) {
 
                                     //扫描记录存库、handle更新，返回成功结果
                                     dbtool.updatahandledb(handleValue);
-                                    callback({
-                                        "result": 1,
-                                        "value": "成功！连接时间：" + connect_time + "ms，扫描时间：" + lescan_time + "ms！"
-                                    });
+                                    //callback({
+                                    //    "result": 1,
+                                    //    "value": "成功！连接时间：" + connect_time + "ms，扫描时间：" + lescan_time + "ms！"
+                                    //});
 
                                 }
                             }
@@ -157,8 +157,10 @@ var BluetoothScanner = module.exports = function (option, callback) {
                                 console.log("lecc(edint) " + macAddr + " failed!");
                                 dbtool.selecthandledb(function (datas) {
                                     console.log("BleHandle:" + datas[0]["value"]);
-                                    var hciToolScans = spawn('hcitool', ['ledc', datas[0]["value"]]);
-                                    hciToolScans.on('exit', function (code) {
+
+                                    var hciToolLedctwice = spawn('hcitool', ['ledc', datas[0]["value"]]);
+                                    hciToolLedctwice.on('exit', function (code) {
+                                        console.log("ledc twice:"+code);
                                         if (code !== 0) {
                                             console.log("lecc failed ledc failed!");
                                             ledc_Twice = 0;
@@ -184,7 +186,9 @@ var BluetoothScanner = module.exports = function (option, callback) {
                                         };
                                         dbtool.insertdb(args);
                                     });
-                                    callback({"result": 0, "value": "失败！扫描时间：" + lescan_time + "ms！"});
+
+
+                                    //callback({"result": 0, "value": "失败！扫描时间：" + lescan_time + "ms！"});
                                 });
                             }
                             else {
@@ -197,19 +201,28 @@ var BluetoothScanner = module.exports = function (option, callback) {
                                 if (code !== 0) {
                                     console.log("Device " + hcidev + "down failed!");
                                     ble_down = 0;
+                                    args = {
+                                        "time": record_time,
+                                        "ble_down": ble_down
+                                    };
+                                    dbtool.updatalastdb(args);
+                                    callback({"result": 0, "value": "蓝牙断开失败！"});
                                 }
                                 else {
                                     console.log("Device " + hcidev + "down succeed!");
                                     ble_down = 1;
-                                }
-                                args = {
-                                    "time": record_time,
-                                    "ble_down": ble_down
-                                };
-                                dbtool.updatalastdb(args);
-                                //callback({"result": 0, "value": "蓝牙断开失败！"});
-                            });
 
+                                    args = {
+                                        "time": record_time,
+                                        "ble_down": ble_down
+                                    };
+                                    dbtool.updatalastdb(args);
+                                    callback({
+                                        "result": 1,
+                                        "value": "成功！连接时间：" + connect_time + "ms，扫描时间：" + lescan_time + "ms！"
+                                    });
+                                }
+                            });
                         });
                     }
                     else {
