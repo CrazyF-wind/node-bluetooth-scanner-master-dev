@@ -87,186 +87,201 @@ var BluetoothScanner = module.exports = function (option, callback) {
                         lescan_time = data["LeScanEndtime"] - data["LeScanBegintime"];
                         console.log("扫描:" + macAddr + ",成功！");
                         console.log("扫描时间：" + lescan_time + "ms");
+                        //写入统计库
+                        args={
+                            "mac": macAddr,
+                            "flag": flag,
+                            "mi": mi,
+                            "mobile": mobile,
+                            "name":devicename,
+                            "inc":{
+                                "lescan": 1,
+                            }
+                        };
+                        dbtool.updateStatisticsdb(args);
                         //begin Connect
                         var begin_time = new Date();
                         var end_time = new Date();
-                        // Start Connect
-                        var hciToolScan = spawn('hcitool', ['EdInt', macAddr, mobileopt["connect-interval"], mobileopt["connect-window"], mobileopt["connect-min_interval"], mobileopt["connect-max_interval"]]);
-                        console.log("hcitool lecc: started...");
-                        console.log("连接设备:" + macAddr);
-                        hciToolScan.stdout.on('data', function (data) {
-                            if (data.length) {
-                                end_time = new Date();
-                                //console.log("连接成功!");
-                                console.log("设备名称:" + option['name'] + "|mac:" + option['mac'] + "|RSSI:" + RSSI);
-                                connect_time = (end_time.getTime() - begin_time.getTime());
-                                console.log('\t' + "连接时间:" + connect_time + "ms");
-                                data = data.toString('utf-8');
-                                // 断开handle
-                                if (data.indexOf('Connection handle ') === 0) {
-                                    var handleValue = data.replace("Connection handle ", "");
-                                    handleValue = handleValue.replace("/n", "");
-                                    console.log("handlevalue:" + handleValue);
-                                    var handleEndtime = new Date();
-                                    //断开操作
-                                    var hciToolScans = spawn('hcitool', ['ledc', handleValue]);
-                                    hciToolScans.on('exit', function (code) {
-                                        disconnect_time = (new Date().getTime() - handleEndtime);
-                                        //console.log("断开成功!");
-                                        console.log('\t' + "断开时间:" + disconnect_time + "ms");
+                        setTimeout(function () {
+                            var hciToolScan = spawn('hcitool', ['EdInt', macAddr, mobileopt["connect-interval"], mobileopt["connect-window"], mobileopt["connect-min_interval"], mobileopt["connect-max_interval"]]);
+                            console.log("hcitool lecc: started..."+['EdInt', macAddr, mobileopt["connect-interval"], mobileopt["connect-window"], mobileopt["connect-min_interval"], mobileopt["connect-max_interval"]]);
+                            console.log("连接设备:" + macAddr);
+                            hciToolScan.stdout.on('data', function (data) {
+                                if (data.length) {
+                                    end_time = new Date();
+                                    //console.log("连接成功!");
+                                    console.log("设备名称:" + option['name'] + "|mac:" + option['mac'] + "|RSSI:" + RSSI);
+                                    connect_time = (end_time.getTime() - begin_time.getTime());
+                                    console.log('\t' + "连接时间:" + connect_time + "ms");
+                                    data = data.toString('utf-8');
+                                    // 断开handle
+                                    if (data.indexOf('Connection handle ') === 0) {
+                                        var handleValue = data.replace("Connection handle ", "");
+                                        handleValue = handleValue.replace("/n", "");
+                                        console.log("handlevalue:" + handleValue);
+                                        var handleEndtime = new Date();
+                                        //断开操作
+                                        var hciToolScans = spawn('hcitool', ['ledc', handleValue]);
+                                        hciToolScans.on('exit', function (code) {
+                                            disconnect_time = (new Date().getTime() - handleEndtime);
+                                            //console.log("断开成功!");
+                                            console.log('\t' + "断开时间:" + disconnect_time + "ms");
 
-                                        if (code !== 0) {
-                                            console.log("lecc succeed ledc failed!");
-                                            //写入统计库
-                                            args={
+                                            if (code !== 0) {
+                                                console.log("lecc succeed ledc failed!");
+                                                //写入统计库
+                                                args={
+                                                    "mac": macAddr,
+                                                    "flag": flag,
+                                                    "mi": mi,
+                                                    "mobile": mobile,
+                                                    "name":devicename,
+                                                    "inc":{
+                                                        "ledc_failed":1,
+                                                        "lecc": 1
+                                                    }
+                                                };
+                                                dbtool.updateStatisticsdb(args);
+                                                // ledc_Once = 1;
+                                            } else {
+                                                console.log("lecc succeed ledc succeed!");
+                                                //写入统计库
+                                                args={
+                                                    "mac": macAddr,
+                                                    "flag": flag,
+                                                    "mi": mi,
+                                                    "mobile": mobile,
+                                                    "name":devicename,
+                                                    "inc":{
+                                                        "ledc_success":1,
+                                                        "lecc": 1
+                                                    }
+                                                };
+                                                dbtool.updateStatisticsdb(args);
+                                                // ledc_Once = 0;
+                                            }
+
+                                            args = {
                                                 "mac": macAddr,
+                                                "ConnectionTime": connect_time,
+                                                "DisconnectTime": disconnect_time,
                                                 "flag": flag,
+                                                "name": devicename,
                                                 "mi": mi,
+                                                "time": record_time,
                                                 "mobile": mobile,
-                                                "name":devicename,
-                                                "inc":{
-                                                    "ledc_failed":1,
-                                                    "lescan": 1,
-                                                    "lecc": 1
-                                                }
+                                                "LescanTime": lescan_time,
+                                                "RSSI": RSSI
                                             };
-                                            dbtool.updateStatisticsdb(args);
-                                            // ledc_Once = 1;
-                                        } else {
-                                            console.log("lecc succeed ledc succeed!");
-                                            //写入统计库
-                                            args={
-                                                "mac": macAddr,
-                                                "flag": flag,
-                                                "mi": mi,
-                                                "mobile": mobile,
-                                                "name":devicename,
-                                                "inc":{
-                                                    "ledc_success":1,
-                                                    "lescan": 1,
-                                                    "lecc": 1
-                                                }
-                                            };
-                                            dbtool.updateStatisticsdb(args);
-                                            // ledc_Once = 0;
-                                        }
+                                            dbtool.insertdb(args);
+                                        });
 
-                                        args = {
-                                            "mac": macAddr,
-                                            "ConnectionTime": connect_time,
-                                            "DisconnectTime": disconnect_time,
-                                            "flag": flag,
-                                            "name": devicename,
-                                            "mi": mi,
-                                            "time": record_time,
-                                            "mobile": mobile,
-                                            "LescanTime": lescan_time,
-                                            "RSSI": RSSI
-                                        };
-                                        dbtool.insertdb(args);
-                                    });
+                                        //扫描记录存库、handle更新，返回成功结果
+                                        dbtool.updatahandledb(handleValue);
+                                        callback({
+                                            "result": 1,
+                                            "value": "成功！连接时间：" + connect_time + "ms，扫描时间：" + lescan_time + "ms！"
+                                        });
 
-                                    //扫描记录存库、handle更新，返回成功结果
-                                    dbtool.updatahandledb(handleValue);
-                                    callback({
-                                        "result": 1,
-                                        "value": "成功！连接时间：" + connect_time + "ms，扫描时间：" + lescan_time + "ms！"
-                                    });
-
+                                    }
                                 }
-                            }
-                        });
-
-                        hciToolScan.on("exit", function (code) {
-                            console.log("exit:" + code);
-                            if (code !== 0) {
-                                //第一次连接失败
-                                console.log("lecc(edint) " + macAddr + " failed!");
-                                dbtool.selecthandledb(function (datas) {
-                                    console.log("BleHandle:" + datas[0]["value"]);
-                                    //第二次断开
-                                    var hciToolScans = spawn('hcitool', ['ledc', datas[0]["value"]]);
-                                    hciToolScans.on('exit', function (code) {
-                                        if (code !== 0) {
-                                            console.log("lecc failed ledc failed!");
-                                            //写入统计库
-                                            args={
-                                                "mac": macAddr,
-                                                "flag": flag,
-                                                "mi": mi,
-                                                "mobile": mobile,
-                                                "name":devicename,
-                                                "inc":{
-                                                    "lecc_failed":1,
-                                                    "ledc_failed":1,
-                                                    "ledc_Twice":1
-                                                }
-                                            };
-                                            dbtool.updateStatisticsdb(args);
-                                            // ledc_Twice = 0;
-                                        } else {
-                                            console.log("lecc failed ledc succeed!");
-                                            //写入统计库
-                                            args={
-                                                "mac": macAddr,
-                                                "flag": flag,
-                                                "mi": mi,
-                                                "mobile": mobile,
-                                                "name":devicename,
-                                                "inc":{
-                                                    "lecc_failed":1,
-                                                    "ledc_failed":1
-                                                }
-                                            };
-                                            dbtool.updateStatisticsdb(args);
-                                            // ledc_Twice = 1;
-                                        }
-                                    });
-                                    callback({"result": 0, "value": "失败！扫描时间：" + lescan_time + "ms！"});
-                                });
-                            }
-                            else {
-                                console.log("连接成功!");
-                                console.log('\t' + "连接成功退出时间:" + (new Date().getTime() - begin_time) + "ms");
-                            }
-
-                            var hciconfig = spawn('hciconfig', [hcidev, 'down']);
-                            hciconfig.on("exit", function (code) {
-                                if (code !== 0) {
-                                    console.log("Device " + hcidev + "down failed!");
-                                    //写入统计库
-                                    args={
-                                        "mac": macAddr,
-                                        "flag": flag,
-                                        "mi": mi,
-                                        "mobile": mobile,
-                                        "name":devicename,
-                                        "inc":{
-                                            "devicedown_failed":1
-                                        }
-                                    };
-                                    dbtool.updateStatisticsdb(args);
-                                }
-                                else {
-                                    console.log("Device " + hcidev + "down succeed!");
-                                    //写入统计库
-                                    args={
-                                        "mac": macAddr,
-                                        "flag": flag,
-                                        "mi": mi,
-                                        "mobile": mobile,
-                                        "name":devicename,
-                                        "inc":{
-                                            "devicedown_success":1
-                                        }
-                                    };
-                                    dbtool.updateStatisticsdb(args);
-                                }
-
-                                //callback({"result": 0, "value": "蓝牙断开失败！"});
                             });
 
-                        });
+                            hciToolScan.on("exit", function (code) {
+                                console.log("exit:" + code);
+                                if (code !== 0) {
+                                    //第一次连接失败
+                                    console.log("lecc(edint) " + macAddr + " failed!");
+                                    dbtool.selecthandledb(function (datas) {
+                                        console.log("BleHandle:" + datas[0]["value"]);
+                                        //第二次断开
+                                        var hciToolScans = spawn('hcitool', ['ledc', datas[0]["value"]]);
+                                        hciToolScans.on('exit', function (code) {
+                                            if (code !== 0) {
+                                                console.log("lecc failed ledc failed!");
+                                                //写入统计库
+                                                args={
+                                                    "mac": macAddr,
+                                                    "flag": flag,
+                                                    "mi": mi,
+                                                    "mobile": mobile,
+                                                    "name":devicename,
+                                                    "inc":{
+                                                        "lecc_failed":1,
+                                                        "ledc_failed":1,
+                                                        "ledc_Twice":1
+                                                    }
+                                                };
+                                                dbtool.updateStatisticsdb(args);
+                                                // ledc_Twice = 0;
+                                            } else {
+                                                console.log("lecc failed ledc succeed!");
+                                                //写入统计库
+                                                args={
+                                                    "mac": macAddr,
+                                                    "flag": flag,
+                                                    "mi": mi,
+                                                    "mobile": mobile,
+                                                    "name":devicename,
+                                                    "inc":{
+                                                        "lecc_failed":1,
+                                                        "ledc_failed":1
+                                                    }
+                                                };
+                                                dbtool.updateStatisticsdb(args);
+                                                // ledc_Twice = 1;
+                                            }
+                                        });
+                                        callback({"result": 0, "value": "失败！扫描时间：" + lescan_time + "ms！"});
+                                    });
+                                }
+                                else {
+                                    console.log("连接成功!");
+                                    console.log('\t' + "连接成功退出时间:" + (new Date().getTime() - begin_time) + "ms");
+                                }
+
+                                var hciconfig = spawn('hciconfig', [hcidev, 'down']);
+                                hciconfig.on("exit", function (code) {
+                                    if (code !== 0) {
+                                        console.log("Device " + hcidev + "down failed!");
+                                        //写入统计库
+                                        args={
+                                            "mac": macAddr,
+                                            "flag": flag,
+                                            "mi": mi,
+                                            "mobile": mobile,
+                                            "name":devicename,
+                                            "inc":{
+                                                "devicedown_failed":1
+                                            }
+                                        };
+                                        dbtool.updateStatisticsdb(args);
+                                    }
+                                    else {
+                                        console.log("Device " + hcidev + "down succeed!");
+                                        //写入统计库
+                                        args={
+                                            "mac": macAddr,
+                                            "flag": flag,
+                                            "mi": mi,
+                                            "mobile": mobile,
+                                            "name":devicename,
+                                            "inc":{
+                                                "devicedown_success":1
+                                            }
+                                        };
+                                        dbtool.updateStatisticsdb(args);
+                                    }
+
+                                    //callback({"result": 0, "value": "蓝牙断开失败！"});
+                                });
+
+                            });
+                        },5000)
+                        // Start Connect
+                        // var hciToolScan = spawn('hcitool', ['EdInt', macAddr, mobileopt["connect-interval"], mobileopt["connect-window"], mobileopt["connect-min_interval"], mobileopt["connect-max_interval"]]);
+                        // console.log("hcitool lecc: started..."+['EdInt', macAddr, mobileopt["connect-interval"], mobileopt["connect-window"], mobileopt["connect-min_interval"], mobileopt["connect-max_interval"]]);
+                        
                     }
                     else {
                         console.log("扫描:" + macAddr + ",失败！");
@@ -283,6 +298,7 @@ var BluetoothScanner = module.exports = function (option, callback) {
                                     "mobile": mobile,
                                     "name":devicename,
                                     "inc":{
+                                        "lescan_failed": 1,
                                         "devicedown_failed":1
                                     }
                                 };
@@ -298,6 +314,7 @@ var BluetoothScanner = module.exports = function (option, callback) {
                                     "mobile": mobile,
                                     "name":devicename,
                                     "inc":{
+                                        "lescan_failed": 1,
                                         "devicedown_success":1
                                     }
                                 };
