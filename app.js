@@ -171,7 +171,8 @@ var BluetoothScanner = module.exports = function (option, callback) {
                                                 "time": record_time,
                                                 "mobile": mobile,
                                                 "LescanTime": lescan_time,
-                                                "RSSI": RSSI
+                                                "RSSI": RSSI,
+                                                "isConnect":0
                                             };
                                             dbtool.insertdb(args);
                                         });
@@ -234,6 +235,19 @@ var BluetoothScanner = module.exports = function (option, callback) {
                                         });
                                         callback({"result": 0, "value": "失败！扫描时间：" + lescan_time + "ms！"});
                                     });
+                                    //记录只扫描不连接的次数
+                                    args = {
+                                        "mac": macAddr,
+                                        "flag": flag,
+                                        "name": devicename,
+                                        "mi": mi,
+                                        "time": record_time,
+                                        "mobile": mobile,
+                                        "LescanTime": lescan_time,
+                                        "RSSI": RSSI,
+                                        "isConnect":0
+                                    };
+                                    dbtool.insertdb(args);
                                 }
                                 else {
                                     console.log("连接成功!");
