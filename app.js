@@ -80,11 +80,12 @@ var BluetoothScanner = module.exports = function (option, callback) {
                     }
                 };
                 //扫描mac
-                bleScanner = new LeScanner(scan_params, function (data) {
-                    console.log("返回扫描结果:" + JSON.stringify(data));
-                    if (data["value"] === "succeed") {
-                        var RSSI = data["RSSI"];
-                        lescan_time = data["LeScanEndtime"] - data["LeScanBegintime"];
+                //bleScanner = new LeScanner(scan_params, function (data) {
+                //    console.log("返回扫描结果:" + JSON.stringify(data));
+                //    if (data["value"] === "succeed") {
+                        var RSSI ='-80';
+                            //data["RSSI"];
+                //        lescan_time = data["LeScanEndtime"] - data["LeScanBegintime"];
                         console.log("扫描:" + macAddr + ",成功！");
                         console.log("扫描时间：" + lescan_time + "ms");
                         //写入统计库
@@ -102,7 +103,7 @@ var BluetoothScanner = module.exports = function (option, callback) {
                         //begin Connect
                         var begin_time = new Date();
                         var end_time = new Date();
-                        setTimeout(function () {
+
                             var hciToolScan = spawn('hcitool', ['EdInt', macAddr, mobileopt["connect-interval"], mobileopt["connect-window"], mobileopt["connect-min_interval"], mobileopt["connect-max_interval"]]);
                             console.log("hcitool lecc: started..."+['EdInt', macAddr, mobileopt["connect-interval"], mobileopt["connect-window"], mobileopt["connect-min_interval"], mobileopt["connect-max_interval"]]);
                             console.log("连接设备:" + macAddr);
@@ -291,55 +292,55 @@ var BluetoothScanner = module.exports = function (option, callback) {
                                 });
 
                             });
-                        },5000)
+
                         // Start Connect
                         // var hciToolScan = spawn('hcitool', ['EdInt', macAddr, mobileopt["connect-interval"], mobileopt["connect-window"], mobileopt["connect-min_interval"], mobileopt["connect-max_interval"]]);
                         // console.log("hcitool lecc: started..."+['EdInt', macAddr, mobileopt["connect-interval"], mobileopt["connect-window"], mobileopt["connect-min_interval"], mobileopt["connect-max_interval"]]);
                         
-                    }
-                    else {
-                        console.log("扫描:" + macAddr + ",失败！");
-                        console.log("扫描时间：" + (data["LeScanEndtime"] - data["LeScanBegintime"]) + "ms");
-                        var hciconfig = spawn('hciconfig', [hcidev, 'down']);
-                        hciconfig.on("exit", function (code) {
-                            if (code !== 0) {
-                                console.log("hcitool Device " + hcidev + "down fail!");
-                                //写入统计库
-                                args={
-                                    "mac": macAddr,
-                                    "flag": flag,
-                                    "mi": mi,
-                                    "mobile": mobile,
-                                    "name":devicename,
-                                    "inc":{
-                                        "lescan_failed": 1,
-                                        "devicedown_failed":1
-                                    }
-                                };
-                                dbtool.updateStatisticsdb(args);
-                            }
-                            else {
-                                console.log("hcitool Device " + hcidev + "down suceed!");
-                                //写入统计库
-                                args={
-                                    "mac": macAddr,
-                                    "flag": flag,
-                                    "mi": mi,
-                                    "mobile": mobile,
-                                    "name":devicename,
-                                    "inc":{
-                                        "lescan_failed": 1,
-                                        "devicedown_success":1
-                                    }
-                                };
-                                dbtool.updateStatisticsdb(args);
-                            }
-
-
-                            callback({"result": 0, "value": "失败！扫描超时！"});
-                        });
-                    }
-                });
+                    //}
+                    //else {
+                    //    console.log("扫描:" + macAddr + ",失败！");
+                    //    console.log("扫描时间：" + (data["LeScanEndtime"] - data["LeScanBegintime"]) + "ms");
+                    //    var hciconfig = spawn('hciconfig', [hcidev, 'down']);
+                    //    hciconfig.on("exit", function (code) {
+                    //        if (code !== 0) {
+                    //            console.log("hcitool Device " + hcidev + "down fail!");
+                    //            //写入统计库
+                    //            args={
+                    //                "mac": macAddr,
+                    //                "flag": flag,
+                    //                "mi": mi,
+                    //                "mobile": mobile,
+                    //                "name":devicename,
+                    //                "inc":{
+                    //                    "lescan_failed": 1,
+                    //                    "devicedown_failed":1
+                    //                }
+                    //            };
+                    //            dbtool.updateStatisticsdb(args);
+                    //        }
+                    //        else {
+                    //            console.log("hcitool Device " + hcidev + "down suceed!");
+                    //            //写入统计库
+                    //            args={
+                    //                "mac": macAddr,
+                    //                "flag": flag,
+                    //                "mi": mi,
+                    //                "mobile": mobile,
+                    //                "name":devicename,
+                    //                "inc":{
+                    //                    "lescan_failed": 1,
+                    //                    "devicedown_success":1
+                    //                }
+                    //            };
+                    //            dbtool.updateStatisticsdb(args);
+                    //        }
+                    //
+                    //
+                    //        callback({"result": 0, "value": "失败！扫描超时！"});
+                    //    });
+                    //}
+                //});
             }
         });
     };
