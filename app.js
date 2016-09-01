@@ -172,7 +172,7 @@ var BluetoothScanner = module.exports = function (option, callback) {
                                                 "mobile": mobile,
                                                 "LescanTime": lescan_time,
                                                 "RSSI": RSSI,
-                                                "isConnect":0
+                                                "isConnect":1
                                             };
                                             dbtool.insertdb(args);
                                         });
