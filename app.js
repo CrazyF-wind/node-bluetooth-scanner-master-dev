@@ -80,12 +80,11 @@ var BluetoothScanner = module.exports = function (option, callback) {
                     }
                 };
                 //扫描mac
-                //bleScanner = new LeScanner(scan_params, function (data) {
-                //    console.log("返回扫描结果:" + JSON.stringify(data));
-                //    if (data["value"] === "succeed") {
-                        var RSSI ='-80';
-                            //data["RSSI"];
-                //        lescan_time = data["LeScanEndtime"] - data["LeScanBegintime"];
+                bleScanner = new LeScanner(scan_params, function (data) {
+                    console.log("返回扫描结果:" + JSON.stringify(data));
+                    if (data["value"] === "succeed") {
+                        var RSSI =data["RSSI"];
+                        lescan_time = data["LeScanEndtime"] - data["LeScanBegintime"];
                         console.log("扫描:" + macAddr + ",成功！");
                         console.log("扫描时间：" + lescan_time + "ms");
                         //写入统计库
