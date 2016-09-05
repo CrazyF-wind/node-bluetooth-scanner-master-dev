@@ -101,6 +101,7 @@ var BluetoothScanner = module.exports = function (option, callback) {
                         dbtool.updateStatisticsdb(args);
                         //begin Connect
                         var begin_time = new Date();
+                        
                         var end_time = new Date();
 
                             var hciToolScan = spawn('hcitool', ['EdInt', macAddr, mobileopt["connect-interval"], mobileopt["connect-window"], mobileopt["connect-min_interval"], mobileopt["connect-max_interval"]]);
